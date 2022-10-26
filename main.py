@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 from uuid import uuid4
 
+#D:\Users\11135250\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.9_qbz5n2kfra8p0\LocalCache\local-packages\Python39\Scripts\streamlit.exe run .\StudioProjects\Streamlit-SQLite-Viewer\main.py
 
 def sqlite_connect(db_bytes):
     """
@@ -44,9 +45,9 @@ def rename_duplicate_cols(data_frame):
 # upload file and download sample
 upload_file = st.file_uploader('Upload dataset:', type=['.sql', '.db', '.sqlite', '.sqlite3', '.db3'],
                                accept_multiple_files=False)
-while upload_file is None:
-    with open("parch-and-posey.db", "rb") as file:
-        st.download_button(label="Download sample dataset", data=file, file_name=file.name)
+if upload_file is None:
+#    with open("parch-and-posey.db", "rb") as file:
+#        st.download_button(label="Download sample dataset", data=file, file_name=file.name)
     st.stop()
 else:
     extension = upload_file.name.split('.')[-1]
@@ -59,11 +60,12 @@ else:
 
 
 # table and metrics
+SAMPLE_QUERY = 'SELECT * FROM table'
 with st.container():
-    query = st.text_area('SQL Query', value='SELECT * FROM table', key='query')
+    query = st.text_area('Type Your SQL Query', value=SAMPLE_QUERY, key='query')
     timer_start = time.perf_counter()
 
-    if query:
+    if query is not SAMPLE_QUERY:
         try:
             df = pd.read_sql_query(query, st.session_state.conn)
         except Exception as E:
@@ -73,7 +75,7 @@ with st.container():
             cols = st.columns(3)
             cols[0].text(f'Exec time: {ms_elapsed}ms')
             cols[1].text(f'Last Query: {time.strftime("%X")}')
-            cols[2].text(f'Shape: {df.shape}')
+            cols[2].text(f'Shape(row, col): {df.shape}')
 
             if df.columns.has_duplicates:
                 rename_duplicate_cols(df)
